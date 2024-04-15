@@ -7,14 +7,16 @@ RUN apt-get update && apt-get install -y \
     maven \
     git
 
+# Устанавливаем рабочую директорию
+
+WORKDIR /app
 # Копирование исходного кода приложения в контейнер
+
 COPY . /app
 
-# Устанавливаем рабочую директорию
-WORKDIR /app
-
 # Собираем приложение с помощью Maven
-RUN mvn package -DskipTests
+
+CMD ./mvnw clean package -DuberJar=true -DskipTests -X
 
 # Запускаем приложение
 CMD ["java", "-jar", "target/quarkus-app/quarkus-run.jar"]
