@@ -1,3 +1,5 @@
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -5,10 +7,12 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import javax.sql.DataSource;
 import java.util.*;
-
+@ApplicationScoped
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -20,7 +24,7 @@ public class Controllers {
 
     private List<StudentCard> studentCardList = new ArrayList<>();
 
-    public Controllers(){
+    public Controllers() throws InterruptedException {
         studentCardList.add(StudentCard.builder().surname("Malofeev").name("Arseniy").build());
     }
 
@@ -210,14 +214,15 @@ public class Controllers {
 
 // работа с очередью
 
-    @Default
-    ChannelRabbit channelRabbit;
 
+    @Inject
+    ChannelRabbit channelRabbit;
     @Path("/send_message-rabbit")
     @POST
-    public String send_message(JsonObject json) {
-        channelRabbit.setCurrentMessage(json);
-        return channelRabbit.getNew_message();
+    public String send_message(JsonObject json) throws InterruptedException {
+        channelRabbit.setSendMessage(json.values().toString());
+        channelRabbit.send_message();
+        return channelRabbit.getNewMessage();
     }
 
 
