@@ -125,7 +125,7 @@ public class Controllers {
     //работа с листом
     @Path("/get_student_card_object")
     @GET
-    public StudentCard get_Class() {return new StudentCard("Arseniy","Malofeev");}
+    public StudentCard getClass() {return new StudentCard("Arseniy","Malofeev");}
 
 
     @GET
@@ -145,7 +145,7 @@ public class Controllers {
 
     @Path("/post_student_card")
     @POST
-    public StudentCard post_object_object(StudentCard mc){
+    public StudentCard postObjectGetObject(StudentCard mc){
         System.out.print(mc);
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
@@ -154,7 +154,7 @@ public class Controllers {
     }
     @Path("/post_student_card/objects")
     @POST
-    public List<StudentCard> post_object_list(StudentCard mc){
+    public List<StudentCard> postObjectGetList(StudentCard mc){
         System.out.print(mc);
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
@@ -163,7 +163,7 @@ public class Controllers {
     }
     @Path("/post_student_cards/object")
     @POST
-    public StudentCard post_object_list(List<StudentCard> mc){
+    public StudentCard postObjectGetList(List<StudentCard> mc){
         System.out.print(mc);
         studentCardList.addAll(mc);
         return mc.get(0);
@@ -171,7 +171,7 @@ public class Controllers {
 
     @Path("/post_collection/objects")
     @POST
-    public List<StudentCard> post_collection(StudentCard mc){
+    public List<StudentCard> postCollection(StudentCard mc){
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
@@ -180,7 +180,7 @@ public class Controllers {
 
     @Path("/put_collection/objects")
     @PUT
-    public List<StudentCard> put_collection(StudentCard mc){
+    public List<StudentCard> putCollection(StudentCard mc){
         StudentCard finded = (StudentCard) studentCardList.stream()
                 .filter(StudentCard -> ((Objects.equals(StudentCard.getName(), mc.getName())) &&
                         (Objects.equals(StudentCard.getSurname(), mc.getSurname())))).findFirst()
@@ -194,7 +194,7 @@ public class Controllers {
 
     @Path("/delete_collection/objects")
     @DELETE
-    public List<StudentCard> delete_collection(StudentCard mc){
+    public List<StudentCard> deleteCollection(StudentCard mc){
         StudentCard finded = (StudentCard) studentCardList.stream()
                 .filter(StudentCard -> ((Objects.equals(StudentCard.getName(), mc.getName())) &&
                         (Objects.equals(StudentCard.getSurname(), mc.getSurname())))).findFirst()
@@ -208,7 +208,7 @@ public class Controllers {
 
     @Path("/get_collection/objects")
     @GET
-    public List<StudentCard> get_collection(){
+    public List<StudentCard> getCollection(){
         return studentCardList;
     }
 
@@ -219,7 +219,7 @@ public class Controllers {
     ChannelRabbit channelRabbit;
     @Path("/send_message-rabbit")
     @POST
-    public String send_message(JsonObject json) throws InterruptedException {
+    public String sendMessage(JsonObject json) throws InterruptedException {
         channelRabbit.setSendMessage(json.values().toString());
         channelRabbit.send_message();
         return channelRabbit.getNewMessage();

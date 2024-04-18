@@ -17,7 +17,7 @@ public class ChannelRabbit {
     private String sendMessage;
 
 
-    public void send_message() throws InterruptedException {
+    public void sendMessage() throws InterruptedException {
         this.emiter.send(this.sendMessage);
         Thread.sleep(250);
     }
