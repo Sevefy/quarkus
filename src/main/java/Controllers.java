@@ -1,3 +1,6 @@
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
@@ -10,6 +13,7 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
+import javax.annotation.processing.Messager;
 import javax.sql.DataSource;
 import java.util.*;
 @ApplicationScoped
@@ -17,16 +21,20 @@ import java.util.*;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class Controllers {
-    @Inject
-    DataSource dataSource;
-    //работа с базой
 
+    //работа с базой
+    @Inject
+    MeterRegistry meterRegistry;
 
     private List<StudentCard> studentCardList = new ArrayList<>();
 
-    public Controllers() throws InterruptedException {
+    public Controllers(MeterRegistry meterRegistry) throws InterruptedException {
+        this.meterRegistry = meterRegistry;
         studentCardList.add(StudentCard.builder().surname("Malofeev").name("Arseniy").build());
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
+        meterRegistry.gauge("database.size", StudentCard.findAll().list().size());
     }
+
 
     @GET
     @Path("/get_all_controllers")
@@ -63,7 +71,7 @@ public class Controllers {
     @Path("/get_students_jdbc")
     public Response getAllStudents2()
     {
-        return new DataBaseQuery(dataSource).getAllStudentsJDBC();
+        return new DataBaseQuery().getAllStudentsJDBC();
     }
 
 
@@ -72,8 +80,10 @@ public class Controllers {
     @Transactional
     @Path("/post_student")
     public Response addStudent(StudentCard student){
+        meterRegistry.counter("add.student.counter").increment();
         System.out.println(student);
         student.persist();
+        meterRegistry.gauge("database.size", StudentCard.findAll().list().size());
         return Response.ok(student).status(200).build();
     }
 
@@ -101,6 +111,7 @@ public class Controllers {
     public Response deleteStudent(@PathParam("id") long id)
     {
         StudentCard.deleteById(id);
+        meterRegistry.gauge("database.size", StudentCard.findAll().list().size());
         return Response.ok().status(200).build();
     }
 
@@ -110,7 +121,7 @@ public class Controllers {
     @Path("/put_student_jdbc/{id}")
     public Response putStudent2(@PathParam("id") long id, StudentCard student)
     {
-        return new DataBaseQuery(dataSource).putStudentJDBC(id,student);
+        return new DataBaseQuery().putStudentJDBC(id,student);
     }
 
 
@@ -119,13 +130,15 @@ public class Controllers {
     @Path("/delete_student_jdbc/{id}")
     public Response deleteStudent2(@PathParam("id") long id)
     {
-        return new DataBaseQuery(dataSource).deleteStudentJDBC(id);
+        Response response = new DataBaseQuery().deleteStudentJDBC(id);
+        meterRegistry.gauge("database.size", StudentCard.findAll().list().size());
+        return response;
     }
 
     //работа с листом
-    @Path("/get_student_card_object")
-    @GET
-    public StudentCard getClass() {return new StudentCard("Arseniy","Malofeev");}
+    //@Path("/get_student_card_object")
+    //@GET
+    //public StudentCard getClass() {return new StudentCard("Arseniy","Malofeev");}
 
 
     @GET
@@ -150,6 +163,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
         return mc;
     }
     @Path("/post_student_card/objects")
@@ -159,6 +173,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
         return studentCardList;
     }
     @Path("/post_student_cards/object")
@@ -166,6 +181,7 @@ public class Controllers {
     public StudentCard postObjectGetList(List<StudentCard> mc){
         System.out.print(mc);
         studentCardList.addAll(mc);
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
         return mc.get(0);
     }
 
@@ -175,6 +191,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
         return studentCardList;
     }
 
@@ -203,6 +220,7 @@ public class Controllers {
         if (finded != null){
             studentCardList.remove(finded);
         }
+        meterRegistry.gaugeCollectionSize("student.card.list.size", Tags.empty(),studentCardList);
         return studentCardList;
     }
 
@@ -221,11 +239,9 @@ public class Controllers {
     @POST
     public String sendMessage(JsonObject json) throws InterruptedException {
         channelRabbit.setSendMessage(json.values().toString());
-        channelRabbit.send_message();
+        channelRabbit.sendMessage();
         return channelRabbit.getNewMessage();
     }
-
-
 
 
 }

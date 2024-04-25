@@ -1,4 +1,5 @@
 import io.quarkus.logging.Log;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
@@ -9,12 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+@ApplicationScoped
 public class DataBaseQuery {
-    private DataSource dataSource;
-    public DataBaseQuery(DataSource dataSource){
-        this.dataSource = dataSource;
-    }
+    @Inject
+    DataSource dataSource;
 
     public Response getAllStudentsJDBC(){
         String sql = "select * from students";
