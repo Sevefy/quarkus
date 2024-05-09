@@ -235,7 +235,9 @@ public class Controllers {
     public Response getRandom(){
         Random random = new Random();
         int randomDigit = random.nextInt(10);
-        myMetric.setRandomDigit(randomDigit);
-        return Response.ok().entity(randomDigit).build();
+        myMetric.setDigit(randomDigit);
+        myMetric.setRandomDigitMetric();
+
+        return Response.ok().entity(myMetric.getDigit()).build();
     }
 }

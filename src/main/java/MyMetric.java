@@ -1,13 +1,22 @@
-import io.micrometer.core.instrument.MeterRegistry;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import lombok.Getter;
+import lombok.Setter;
 
 @ApplicationScoped
 public class MyMetric {
+    @Setter
+    @Getter
+    private int digit;
+
+
     @Inject
-    MeterRegistry registry;
-    public void setRandomDigit(@Observes int randomDigit){
-        registry.gauge("random_digit", randomDigit);
+    MetricRegistry registry;
+
+    public void setRandomDigitMetric(){
+        registry.gauge("random_digit",()-> this.digit);
     }
+
 }
