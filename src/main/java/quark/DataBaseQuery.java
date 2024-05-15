@@ -1,3 +1,5 @@
+package quark;
+
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

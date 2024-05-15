@@ -1,31 +1,31 @@
+package quark;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.processing.Messager;
-import javax.sql.DataSource;
 import java.util.*;
+import java.util.logging.Logger;
+
 @ApplicationScoped
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class Controllers {
 
-    //работа с базой
+    private static final Logger logger = Logger.getLogger(Controllers.class.toString());    //работа с базой
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Controllers.class);
 
     private List<StudentCard> studentCardList = new ArrayList<>();
 
     public Controllers() throws InterruptedException {
         studentCardList.add(StudentCard.builder().surname("Malofeev").name("Arseniy").build());
+        logger.info("Была добавлена запись " + studentCardList.get(0).getSurname());
     }
 
 
@@ -51,6 +51,7 @@ public class Controllers {
         controllers.put("/get_student_card_object", " - дает объект студента");
         controllers.put("/send_message-rabbit", " - отправка сообщения в очередь сообщений");
         controllers.put("/random", " - показ и обновление метрики");
+        logger.info("Вызван список контроллеров");
         return Response.ok(controllers).build();
     }
 
@@ -58,6 +59,7 @@ public class Controllers {
     @Path("/get_students")
     public Response getAllStudents()
     {
+        logger.info("вызван контроллер для получения списка студентов");
         return Response.ok(StudentCard.findAll().list()).build();
     }
 
@@ -65,6 +67,7 @@ public class Controllers {
     @Path("/get_students_jdbc")
     public Response getAllStudents2()
     {
+        logger.info("вызван контроллер для получения списка студентов");
         return new DataBaseQuery().getAllStudentsJDBC();
     }
 
@@ -74,6 +77,7 @@ public class Controllers {
     @Transactional
     @Path("/post_student")
     public Response addStudent(StudentCard student){
+        logger.info("+студент" + student.getSurname());
         System.out.println(student);
         student.persist();
         return Response.ok(student).status(200).build();
@@ -84,6 +88,7 @@ public class Controllers {
     @Path("/put_student/{id}")
     public Response putStudent(@PathParam("id") long id, StudentCard student){
         StudentCard curStudent = StudentCard.findById(id);
+        logger.info("обновление студнета с индексом" + id);
         if (curStudent == null) {
             throw new WebApplicationException("Person with id of " + id + " does not exist.", 404);
         }
@@ -102,6 +107,7 @@ public class Controllers {
     @Path("/delete_student/{id}")
     public Response deleteStudent(@PathParam("id") long id)
     {
+        logger.info("Удаление студента с индексом " + id);
         StudentCard.deleteById(id);
         return Response.ok().status(200).build();
     }
@@ -112,6 +118,7 @@ public class Controllers {
     @Path("/put_student_jdbc/{id}")
     public Response putStudent2(@PathParam("id") long id, StudentCard student)
     {
+        logger.info("обновление студента с индексом " + id);
         return new DataBaseQuery().putStudentJDBC(id,student);
     }
 
@@ -121,20 +128,21 @@ public class Controllers {
     @Path("/delete_student_jdbc/{id}")
     public Response deleteStudent2(@PathParam("id") long id)
     {
-        Response response = new DataBaseQuery().deleteStudentJDBC(id);
-        return response;
+        logger.info("удаление студента с индексом " + id);
+        return new DataBaseQuery().deleteStudentJDBC(id);
     }
 
     //работа с листом
     //@Path("/get_student_card_object")
     //@GET
-    //public StudentCard getClass() {return new StudentCard("Arseniy","Malofeev");}
+    //public quark.StudentCard getClass() {return new quark.StudentCard("Arseniy","Malofeev");}
 
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/{text}")
     public String getText(@PathParam("text") String text) {
+        logger.info("был вызван несуществующий контроллер");
         return text;
     }
 
@@ -143,6 +151,7 @@ public class Controllers {
     @Produces({ MediaType.TEXT_PLAIN })
     public String getByQueryParam(
             @QueryParam("place") String place) {
+        logger.info("вызван контроллер с каким-то параметром");
         return "query param = " + place;
     }
 
@@ -153,6 +162,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        logger.info("+студент" + mc.getSurname());
         return mc;
     }
     @Path("/post_student_card/objects")
@@ -162,6 +172,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        logger.info("+студент" + mc.getSurname());
         return studentCardList;
     }
     @Path("/post_student_cards/object")
@@ -169,6 +180,7 @@ public class Controllers {
     public StudentCard postObjectGetList(List<StudentCard> mc){
         System.out.print(mc);
         studentCardList.addAll(mc);
+        logger.info("+студенты");
         return mc.get(0);
     }
 
@@ -178,6 +190,7 @@ public class Controllers {
         if (!Objects.equals(mc.getName(), "") || !Objects.equals(mc.getSurname(), "")){
             studentCardList.add(mc);
         }
+        logger.info("+студент" + mc.getSurname());
         return studentCardList;
     }
 
@@ -192,6 +205,7 @@ public class Controllers {
         if (finded != null){
             studentCardList.set(studentCardList.indexOf(finded), mc);
         }
+        logger.info("студент обновлен" + mc.getSurname());
         return studentCardList;
     }
 
@@ -206,6 +220,7 @@ public class Controllers {
         if (finded != null){
             studentCardList.remove(finded);
         }
+        logger.info("студент удален" + mc.getSurname());
         return studentCardList;
     }
 
@@ -225,6 +240,8 @@ public class Controllers {
     public String sendMessage(JsonObject json) throws InterruptedException {
         channelRabbit.setSendMessage(json.values().toString());
         channelRabbit.sendMessage();
+        logger.info("отправлено сообщение в очередь " +  channelRabbit.getSendMessage());
+        logger.info("получено сообщение из очереди " + channelRabbit.getNewMessage());
         return channelRabbit.getNewMessage();
     }
 
@@ -237,7 +254,7 @@ public class Controllers {
         int randomDigit = random.nextInt(10);
         myMetric.setDigit(randomDigit);
         myMetric.setRandomDigitMetric();
-
+        logger.info("обновлено значение в метрике");
         return Response.ok().entity(myMetric.getDigit()).build();
     }
 }

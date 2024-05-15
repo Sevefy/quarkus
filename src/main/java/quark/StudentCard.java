@@ -1,3 +1,5 @@
+package quark;
+
 import jakarta.persistence.*;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import lombok.*;

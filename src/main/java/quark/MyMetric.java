@@ -1,6 +1,7 @@
+package quark;
+
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.Setter;
