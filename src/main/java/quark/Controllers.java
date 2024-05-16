@@ -17,9 +17,11 @@ import java.util.logging.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class Controllers {
-
+    @Inject
+    ChannelRabbit channelRabbit;
+    @Inject
+    MyMetric myMetric;
     private static final Logger logger = Logger.getLogger(Controllers.class.toString());    //работа с базой
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(Controllers.class);
 
     private List<StudentCard> studentCardList = new ArrayList<>();
 
@@ -233,8 +235,7 @@ public class Controllers {
 // работа с очередью
 
 
-    @Inject
-    ChannelRabbit channelRabbit;
+
     @Path("/send_message-rabbit")
     @POST
     public String sendMessage(JsonObject json) throws InterruptedException {
@@ -245,16 +246,12 @@ public class Controllers {
         return channelRabbit.getNewMessage();
     }
 
-    @Inject
-    MyMetric myMetric;
+
     @Path("/random")
     @GET
     public Response getRandom(){
-        Random random = new Random();
-        int randomDigit = random.nextInt(10);
-        myMetric.setDigit(randomDigit);
-        myMetric.setRandomDigitMetric();
+
         logger.info("обновлено значение в метрике");
-        return Response.ok().entity(myMetric.getDigit()).build();
+        return Response.ok().entity(myMetric.setRandomDigitMetric()).build();
     }
 }
