@@ -27,7 +27,8 @@ public class ConsulClass {
     String appVersion;
     @ConfigProperty(name = "quarkus.http.port")
     int port;
-
+    @ConfigProperty(name = "quarkus.http.hostname")
+    String hostname;
     void onStart(@Observes StartupEvent ev) {
         ScheduledExecutorService executorService = Executors
                 .newSingleThreadScheduledExecutor();
@@ -37,7 +38,7 @@ public class ConsulClass {
             ImmutableRegistration registration = ImmutableRegistration.builder()
                     .id(instanceId)
                     .name(appName + port)
-                    .address("127.0.0.1")
+                    .address(hostname)
                     .port(port)
                     .putMeta("version", appVersion)
                     .build();
